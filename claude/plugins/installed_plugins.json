@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "plugins": {
+    "beads@beads-marketplace": [
+      {
+        "scope": "local",
+        "projectPath": "/Users/araftery/workspace/intelligems",
+        "installPath": "/Users/araftery/.claude/plugins/cache/beads-marketplace/beads/0.47.0",
+        "version": "0.47.0",
+        "installedAt": "2026-01-12T00:57:48.450Z",
+        "lastUpdated": "2026-01-12T00:57:48.450Z"
+      }
+    ],
+    "frontend-design@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/araftery/.claude/plugins/cache/claude-plugins-official/frontend-design/aa296ec81e8c",
+        "version": "aa296ec81e8c",
+        "installedAt": "2026-02-06T15:45:17.529Z",
+        "lastUpdated": "2026-02-20T20:45:37.086Z",
+        "gitCommitSha": "236752ad9ab36029b648bfd94707944760242768"
+      }
+    ],
+    "frontend-design@claude-code-plugins": [
+      {
+        "scope": "local",
+        "installPath": "/Users/araftery/.claude/plugins/cache/claude-code-plugins/frontend-design/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-21T06:17:51.653Z",
+        "lastUpdated": "2026-02-21T06:17:51.653Z",
+        "gitCommitSha": "3ad3231f0f3a9ff4e1be18d20cbea1e9955d0047",
+        "projectPath": "/Users/araftery/workspace/watchlist"
+      }
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+#compdef cortex
+# cortex-cli-completion-version: 1.0.12+183057.950e63f0ed1c
+
+_cortex() {
+    local context state state_descr line
+    typeset -A opt_args
+
+    _arguments -C \
+        '(-w --workdir)'{-w,--workdir}'[Working directory]:directory:_directories' \
+        '(-c --connection)'{-c,--connection}'[Snowflake connection name]:connection:' \
+        '(-m --model)'{-m,--model}'[Model override]:model:' \
+        '--plan[Enable plan mode]' \
+        '--bypass[Enable bypass safeguards mode (auto-approve all tool calls)]' \
+        '--dangerously-allow-all-tool-calls[Enable bypass safeguards mode (auto-approve all tool calls)]' \
+        '--auto-accept-plans[Auto-accept plan mode requests and confirmations without prompting]' \
+        '--profile[Apply a profile configuration (from ~/.snowflake/cortex/profiles/)]:profile:' \
+        '(-r --resume)'{-r,--resume}'[Open the resume menu on startup or immediately resume a session by session ID]:resume:' \
+        '--continue[Resume the most recent session]' \
+        '--session-name[Name for the new session (ignored when resuming)]:session-name:' \
+        '--output-format[Output format: 'stream-json' for JSON streaming output]:output-format:' \
+        '(-p --print)'{-p,--print}'[Print a series of chat response and exit (in headless, non-interactive mode)]:print:' \
+        '--config[Path to a custom settings.json configuration file (default: ~/.snowflake/cortex/settings.json)]:file:_files' \
+        '--config-file[Path to Snowflake connection config file (connections.toml or config.toml)]:config-file:' \
+        '--skills[Path to a custom skills.json configuration file (default: ~/.snowflake/cortex/skills.json)]:file:_files' \
+        '--mcp[Enable MCP servers (use --no-mcp to disable)]' \
+        '--auto-update[Auto-update on launch (use --no-auto-update to disable)]' \
+        '--worktree[Create a new worktree with the specified branch name and start session in it]:worktree:' \
+        '--plugin-dir[Plugin directory or GitHub repo (owner/repo, owner/repo#branch, or URL). Can be repeated.]:plugin-dir:' \
+        '(-V --version)'{-V,--version}'[Show version]' \
+        '(-h --help)'{-h,--help}'[Show help]' \
+        '1: :->commands' \
+        '*: :->args' \
+        && return 0
+
+    case \$state in
+        commands)
+            local commands=(
+                'mcp:Manage MCP servers'
+                'profile:Manage profiles'
+                'skill:Manage skill directories'
+                'resume:Resume a previous session'
+                'update:Update to latest version'
+                'versions:List locally installed versions'
+                'worktree:Manage git worktrees'
+                'completion:Shell completion scripts'
+                'connections:Manage Snowflake connections'
+                'search:Search operations'
+                'reflect:Validate semantic model'
+                'artifact:Artifact operations'
+                'analyst:Cortex Analyst operations'
+                'env:Environment detection'
+            )
+            _describe 'commands' commands
+            ;;
+    esac
+}
+
+_cortex "\$@"
