@@ -72,9 +72,13 @@ zl() {
         if zellij list-sessions -s 2>/dev/null | grep -qx "$session_name"; then
             zellij attach "$session_name"
         else
-            local style="${DEV_LAYOUT:-right-split}"
             local layout_file
-            layout_file=$(zl-layout-dev "$style" "${DEV_COMMANDS[@]}")
+            if [[ ${#DEV_COMMANDS[@]} -eq 0 ]]; then
+                layout_file=$(zl-layout-simple)
+            else
+                local style="${DEV_LAYOUT:-right-split}"
+                layout_file=$(zl-layout-dev "$style" "${DEV_COMMANDS[@]}")
+            fi
             zellij --new-session-with-layout "$layout_file" -s "$session_name"
         fi
     else

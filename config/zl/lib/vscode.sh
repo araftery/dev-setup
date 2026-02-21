@@ -12,11 +12,12 @@ zl-vscode() {
     fi
 
     # Source config, then read the values we need
-    local WT_PATHS WT_VSCODE_ACCENT
+    local -A WT_PATHS WT_VSCODE_ACCENT WT_BG
     source "$config_file"
 
     local wt_path="${WT_PATHS[$wt]}"
     local accent="${WT_VSCODE_ACCENT[$wt]}"
+    local bg="${WT_BG[$wt]}"
 
     if [[ -z "$wt_path" || -z "$accent" ]]; then
         echo "zl-vscode: no config for ${project} wt${wt}"
@@ -37,7 +38,9 @@ zl-vscode() {
         "titleBar.activeBackground": "${accent}",
         "titleBar.activeForeground": "${fg}",
         "statusBar.background": "${accent}",
-        "statusBar.foreground": "${fg}"
+        "statusBar.foreground": "${fg}",
+        "sideBar.background": "${bg}",
+        "activityBar.background": "${bg}"
     }
 }
 ENDJSON
@@ -61,15 +64,15 @@ ENDJSON
 
 zl-vscode-all() {
     local config_dir="${HOME}/.config/zl/projects"
+    local project wt
+    local -A WT_PATHS
     for config_file in "$config_dir"/*.sh; do
-        local project
         project=$(basename "$config_file" .sh)
 
         # Source config to get WT_PATHS keys
-        local WT_PATHS
+        WT_PATHS=()
         source "$config_file"
 
-        local wt
         for wt in ${(k)WT_PATHS}; do
             if [[ -d "${WT_PATHS[$wt]}" ]]; then
                 zl-vscode "$project" "$wt"
