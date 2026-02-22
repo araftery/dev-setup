@@ -1,0 +1,14 @@
+/Users/araftery/workspace/dev-tools/claude-permissions-hook/target/release/deps/libserde-51bd8d9483a9f474.rmeta: /Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/araftery/workspace/dev-tools/claude-permissions-hook/target/release/build/serde-e140c6bbf33d53e2/out/private.rs
+
+/Users/araftery/workspace/dev-tools/claude-permissions-hook/target/release/deps/libserde-51bd8d9483a9f474.rlib: /Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/araftery/workspace/dev-tools/claude-permissions-hook/target/release/build/serde-e140c6bbf33d53e2/out/private.rs
+
+/Users/araftery/workspace/dev-tools/claude-permissions-hook/target/release/deps/serde-51bd8d9483a9f474.d: /Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/araftery/workspace/dev-tools/claude-permissions-hook/target/release/build/serde-e140c6bbf33d53e2/out/private.rs
+
+/Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs:
+/Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs:
+/Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs:
+/Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs:
+/Users/araftery/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs:
+/Users/araftery/workspace/dev-tools/claude-permissions-hook/target/release/build/serde-e140c6bbf33d53e2/out/private.rs:
+
+# env-dep:OUT_DIR=/Users/araftery/workspace/dev-tools/claude-permissions-hook/target/release/build/serde-e140c6bbf33d53e2/out
