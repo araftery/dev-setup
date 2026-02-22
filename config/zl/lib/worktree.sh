@@ -10,6 +10,38 @@
 # Multiple projects can share the same source repo (e.g. intelligems
 # and cro-agent both use the intelligems repo).
 
+# Copy node_modules from source worktree using CoW clones, then run pnpm install
+_zwt_copy_node_modules() {
+    local src="$1" dst="$2"
+    local count=0
+    while IFS= read -r rel; do
+        local dir="${rel%/*}"
+        [[ "$dir" != "$rel" ]] && mkdir -p "${dst}/${dir}"
+        cp -Rc "${src}/${rel}" "${dst}/${rel}"
+        ((count++))
+    done < <(cd "$src" && find . -name "node_modules" -maxdepth 3 -not -path "*/node_modules/*/node_modules/*" -not -path "*/.git/*" | sed 's|^\./||')
+    if [[ $count -gt 0 ]]; then
+        echo "Cloned ${count} node_modules dir(s) from ${src} (CoW)"
+        echo "Running pnpm install to reconcile..."
+        (DIRENV_DIFF="" DIRENV_WATCHES="" HUSKY=0 cd "$dst" && pnpm install --frozen-lockfile 2>&1 | tail -3)
+    fi
+}
+
+# Copy .env* files from source worktree to new worktree, preserving directory structure
+_zwt_copy_env_files() {
+    local src="$1" dst="$2"
+    local count=0
+    while IFS= read -r rel; do
+        local dir="${rel%/*}"
+        [[ "$dir" != "$rel" ]] && mkdir -p "${dst}/${dir}"
+        cp "${src}/${rel}" "${dst}/${rel}"
+        ((count++))
+    done < <(cd "$src" && find . -name ".env*" -not -path "*/node_modules/*" -not -path "*/.git/*" | sed 's|^\./||')
+    if [[ $count -gt 0 ]]; then
+        echo "Copied ${count} .env file(s) from ${src}"
+    fi
+}
+
 zwt() {
     # Parse leading flags / subcommands
     local mode="create"
@@ -88,20 +120,32 @@ zwt() {
                 return 1
             fi
 
+            # Resolve base branch from wt1 (same as cycle)
+            local wt1_path="${WT_PATHS[1]}"
+            local base_branch
+            base_branch=$(git -C "$wt1_path" branch --show-current 2>/dev/null)
+            if [[ -z "$base_branch" ]]; then
+                echo "zwt: wt1 at ${wt1_path} is in detached HEAD state"
+                return 1
+            fi
+
             if [[ -n "$branch" ]]; then
                 # Check if branch already exists
                 if git -C "$source_path" show-ref --verify --quiet "refs/heads/${branch}"; then
                     git -C "$source_path" worktree add "$wt_path" "$branch"
                 else
-                    git -C "$source_path" worktree add -b "$branch" "$wt_path"
+                    git -C "$source_path" worktree add -b "$branch" "$wt_path" "$base_branch"
                 fi
             else
                 # Default: new branch named <project>-wt<N>
                 local default_branch="${project}-wt${wt}"
-                git -C "$source_path" worktree add -b "$default_branch" "$wt_path"
+                git -C "$source_path" worktree add -b "$default_branch" "$wt_path" "$base_branch"
             fi
 
             if [[ $? -eq 0 ]]; then
+                _zwt_copy_env_files "${WT_PATHS[1]:-$source_path}" "$wt_path"
+                _zwt_copy_node_modules "${WT_PATHS[1]:-$source_path}" "$wt_path"
+                zl-vscode "$project" "$wt"
                 echo "Created worktree at ${wt_path}"
                 echo "Start session:  zl ${project} ${wt} [--dev]"
             fi
@@ -153,27 +197,8 @@ zwt() {
                 fi
                 echo "    Clean."
 
-                # Check that the branch has been pushed to the remote
+                # Check that base_branch contains all commits from old_branch
                 if [[ -n "$old_branch" ]]; then
-                    echo "==> Checking that '${old_branch}' is pushed to remote..."
-                    local local_sha remote_sha
-                    local_sha=$(git -C "$wt_path" rev-parse "$old_branch" 2>/dev/null)
-                    remote_sha=$(git -C "$wt_path" rev-parse "origin/${old_branch}" 2>/dev/null)
-
-                    if [[ -z "$remote_sha" ]]; then
-                        echo "ABORT: branch '${old_branch}' has no remote tracking branch"
-                        echo "  cd ${wt_path} && git push -u origin ${old_branch}"
-                        return 1
-                    fi
-
-                    if [[ "$local_sha" != "$remote_sha" ]]; then
-                        echo "ABORT: local '${old_branch}' is ahead of remote"
-                        echo "  cd ${wt_path} && git push"
-                        return 1
-                    fi
-                    echo "    Pushed."
-
-                    # Check that base_branch contains all commits from old_branch
                     echo "==> Checking that '${base_branch}' contains '${old_branch}'..."
                     local behind
                     behind=$(git -C "$wt_path" rev-list --count "${base_branch}..${old_branch}" 2>/dev/null)
@@ -185,9 +210,9 @@ zwt() {
                     echo "    Merged."
                 fi
 
-                # All clear — remove the old worktree
-                echo "==> Removing old worktree at ${wt_path}..."
-                git -C "$source_path" worktree remove "$wt_path" || return 1
+                # All clear — switch to new branch in-place
+                echo "==> Switching to new branch '${new_branch}' from '${base_branch}'..."
+                git -C "$wt_path" switch -C "$new_branch" "$base_branch" || return 1
 
                 # Delete the old local branch if it was merged
                 if [[ -n "$old_branch" ]]; then
@@ -198,16 +223,13 @@ zwt() {
                     fi
                 fi
             else
-                echo "==> No existing worktree at ${wt_path}, skipping removal."
+                # No existing worktree — fall back to full create
+                echo "==> No existing worktree at ${wt_path}, creating fresh..."
+                git -C "$source_path" worktree add -b "$new_branch" "$wt_path" "$base_branch" || return 1
+                _zwt_copy_env_files "${wt1_path}" "$wt_path"
+                _zwt_copy_node_modules "${wt1_path}" "$wt_path"
+                zl-vscode "$project" "$wt"
             fi
-
-            # --- Create new worktree branching from wt1's current branch ---
-            echo "==> Creating worktree at ${wt_path} on branch '${new_branch}' from '${base_branch}'..."
-            if git -C "$source_path" show-ref --verify --quiet "refs/heads/${new_branch}"; then
-                echo "ABORT: branch '${new_branch}' already exists locally"
-                return 1
-            fi
-            git -C "$source_path" worktree add -b "$new_branch" "$wt_path" "$base_branch" || return 1
 
             echo "==> Done! Start session:  zl ${project} ${wt} [--dev]"
             ;;

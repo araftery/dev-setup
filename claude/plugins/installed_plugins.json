@@ -24,12 +24,22 @@
     "frontend-design@claude-code-plugins": [
       {
         "scope": "local",
+        "projectPath": "/Users/araftery/workspace/watchlist",
         "installPath": "/Users/araftery/.claude/plugins/cache/claude-code-plugins/frontend-design/1.0.0",
         "version": "1.0.0",
         "installedAt": "2026-02-21T06:17:51.653Z",
         "lastUpdated": "2026-02-21T06:17:51.653Z",
-        "gitCommitSha": "3ad3231f0f3a9ff4e1be18d20cbea1e9955d0047",
-        "projectPath": "/Users/araftery/workspace/watchlist"
+        "gitCommitSha": "3ad3231f0f3a9ff4e1be18d20cbea1e9955d0047"
+      }
+    ],
+    "rust-analyzer-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/araftery/.claude/plugins/cache/claude-plugins-official/rust-analyzer-lsp/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-21T22:14:37.914Z",
+        "lastUpdated": "2026-02-21T22:14:37.914Z",
+        "gitCommitSha": "aa296ec81e8ccb49c9784f167c2c0aa625a86cec"
       }
     ]
   }

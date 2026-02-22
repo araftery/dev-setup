@@ -17,16 +17,19 @@
       "mcp__serena__initial_instructions",
       "mcp__serena__onboarding"
     ],
-    "ask": [
+    "deny": [
       "mcp__serena__replace_symbol_body",
       "mcp__serena__insert_after_symbol",
-      "mcp__serena__insert_before_symbol",
+      "mcp__serena__insert_before_symbol"
+    ],
+    "ask": [
       "mcp__serena__rename_symbol",
       "mcp__serena__write_memory",
       "mcp__serena__delete_memory",
       "mcp__serena__edit_memory"
     ]
   },
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -34,7 +37,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/bash-permission.sh"
+            "command": "~/.claude/hooks/claude-hook bash"
           }
         ]
       },
@@ -43,7 +46,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/read-permission.sh"
+            "command": "~/.claude/hooks/claude-hook read"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/claude-hook write"
           }
         ]
       },
@@ -52,7 +64,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/web-permission.sh"
+            "command": "~/.claude/hooks/claude-hook web"
           }
         ]
       }
@@ -75,76 +87,22 @@
             "command": "/opt/homebrew/bin/terminal-notifier -title 'Claude Code' -message 'Needs permission' -sound Purr"
           }
         ]
-      },
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/araftery/.claude/hooks/peon-ping/peon.sh",
-            "timeout": 10
-          }
-        ]
       }
     ],
-    "SessionStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/araftery/.claude/hooks/peon-ping/peon.sh",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/araftery/.claude/hooks/peon-ping/peon.sh",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/araftery/.claude/hooks/peon-ping/peon.sh",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "PermissionRequest": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/araftery/.claude/hooks/peon-ping/peon.sh",
-            "timeout": 10
-          }
-        ]
-      }
-    ]
+    "SessionStart": [],
+    "UserPromptSubmit": [],
+    "Stop": [],
+    "PermissionRequest": []
   },
   "statusLine": {
     "type": "command",
     "command": "bash /Users/araftery/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
-    "frontend-design@claude-plugins-official": true
+    "frontend-design@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
   },
   "feedbackSurveyState": {
     "lastShownTime": 1754086319166
-  },
-  "model": "opus"
+  }
 }

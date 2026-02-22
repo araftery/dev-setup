@@ -72,12 +72,21 @@ zl() {
         if zellij list-sessions -s 2>/dev/null | grep -qx "$session_name"; then
             zellij attach "$session_name"
         else
+            # Per-worktree command override: DEV_COMMANDS_2, DEV_COMMANDS_3, etc.
+            local -a _cmds
+            local _override="DEV_COMMANDS_${wt}"
+            if [[ -n "${(P)_override+x}" ]]; then
+                _cmds=("${(@P)_override}")
+            else
+                _cmds=("${DEV_COMMANDS[@]}")
+            fi
+
             local layout_file
-            if [[ ${#DEV_COMMANDS[@]} -eq 0 ]]; then
+            if [[ ${#_cmds[@]} -eq 0 ]]; then
                 layout_file=$(zl-layout-simple)
             else
                 local style="${DEV_LAYOUT:-right-split}"
-                layout_file=$(zl-layout-dev "$style" "${DEV_COMMANDS[@]}")
+                layout_file=$(zl-layout-dev "$style" "${_cmds[@]}")
             fi
             zellij --new-session-with-layout "$layout_file" -s "$session_name"
         fi

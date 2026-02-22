@@ -46,10 +46,9 @@ This runs safety checks, then removes the old worktree and creates a fresh one:
 
 1. Resolves the base branch from wt1's current branch (usually `main`)
 2. Checks the old worktree is clean (no uncommitted/untracked files)
-3. Checks the old branch is pushed to remote
-4. Checks the old branch is fully merged into the base branch
-5. Removes the old worktree and deletes the local branch
-6. Creates a new worktree on `<new-branch>` branching from the base
+3. Checks the old branch is fully merged into the base branch
+4. Removes the old worktree and deletes the local branch
+5. Creates a new worktree on `<new-branch>` branching from the base
 
 If any check fails, it aborts with a message explaining what to fix.
 
@@ -101,6 +100,7 @@ All layouts run `claude` in the left/main pane. Right-side panes are either plai
 | `right-split` | 2 right | 65% claude left, 2 stacked right panes |
 | `right-triple` | 3 right | 60% claude left, 3 stacked right panes |
 | `bottom-split` | 2 bottom | 70% claude top, 2 side-by-side bottom panes |
+| `top-split` | 2 top + 1 bottom | 70% top (65% claude + 35% shell), 30% bottom pane |
 | `grid` | 3 other | 2x2 grid, claude top-left |
 
 `DEV_COMMANDS` fills the non-claude panes in order. Empty strings become plain terminal panes.

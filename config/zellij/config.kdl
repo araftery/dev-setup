@@ -146,6 +146,7 @@ keybinds clear-defaults=true {
         }
     }
     shared_except "locked" {
+        bind "Ctrl l" { Write 12; } // Pass through Ctrl+L (form feed) to clear terminal
         bind "Alt +" { Resize "Increase"; }
         bind "Alt -" { Resize "Decrease"; }
         bind "Alt =" { Resize "Increase"; }

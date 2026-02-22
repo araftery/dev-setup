@@ -63,6 +63,7 @@ KDL
 #   right-split   — 65% claude left, 2 stacked right panes (default)
 #   right-triple  — 60% claude left, 3 stacked right panes
 #   bottom-split  — 70% claude top, 2 side-by-side bottom panes
+#   top-split     — 70% top (65% claude + 35% shell), 30% bottom pane
 #   grid          — 2x2 grid, claude top-left
 zl-layout-dev() {
     local style="${1:-right-split}"
@@ -121,6 +122,24 @@ zl-layout-dev() {
                 _zl_pane "50%" "${cmds[1]}"
                 _zl_pane "50%" "${cmds[2]}"
                 echo '        }'
+                echo '    }'
+                _zl_bar_bottom
+                echo '}'
+            } > "$layout_file"
+            ;;
+        top-split)
+            {
+                echo 'layout {'
+                _zl_bar_top
+                echo '    pane split_direction="horizontal" {'
+                echo '        pane split_direction="vertical" size="70%" {'
+                echo '            pane size="65%" {'
+                echo '                command "zsh"'
+                echo '                args "-c" "claude; exec zsh"'
+                echo '            }'
+                _zl_pane "35%" "${cmds[1]}"
+                echo '        }'
+                _zl_pane "30%" "${cmds[2]}"
                 echo '    }'
                 _zl_bar_bottom
                 echo '}'
