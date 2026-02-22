@@ -5,6 +5,7 @@ const ALLOWED_DIRS: &[&str] = &[
     "/Users/araftery/workspace",
     "/etc/ig",
     "/Users/araftery/.config/zl",
+    "/Users/araftery/.claude",
 ];
 
 /// Normalize a path: resolve `.` and `..` components without requiring the path to exist.
