@@ -46,6 +46,17 @@ const SAFE_PYTHON_MODULES: &[&str] = &[
     "pytest", "mypy", "ruff", "black",
 ];
 
+/// gh subcommands that require further sub-subcommand validation
+/// These are only safe when used with read-only sub-subcommands
+const GH_SUBCOMMANDS_NEEDING_CHECK: &[&str] = &[
+    "pr", "issue", "repo", "run", "workflow", "release", "label", "project",
+];
+
+/// Safe sub-subcommands for gh (read-only operations)
+const SAFE_GH_SUB_SUBCOMMANDS: &[&str] = &[
+    "view", "list", "diff", "checks", "status", "ls",
+];
+
 /// Evaluate a Bash tool invocation
 pub fn evaluate(input: &HookInput) -> Decision {
     let command = match input.get_input_str("command") {
@@ -354,6 +365,29 @@ fn is_safe_command(segment: &str, current_dir: &str) -> bool {
             // git config --get or --list
             if *subcmd == "config" && tokens.iter().any(|t| *t == "--get" || *t == "--list") {
                 return true;
+            }
+        }
+        return false;
+    }
+
+    // gh (GitHub CLI) with safe subcommands
+    if cmd == "gh" {
+        if let Some(subcmd) = tokens.get(1) {
+            // gh api is always safe (read-only by default)
+            if *subcmd == "api" {
+                return true;
+            }
+            // gh status, gh search — no sub-subcommand needed
+            if *subcmd == "status" || *subcmd == "search" {
+                return true;
+            }
+            // Subcommands that need a read-only sub-subcommand
+            if GH_SUBCOMMANDS_NEEDING_CHECK.contains(subcmd) {
+                if let Some(sub_subcmd) = tokens.get(2) {
+                    return SAFE_GH_SUB_SUBCOMMANDS.contains(sub_subcmd);
+                }
+                // bare `gh pr` / `gh issue` with no action — not safe
+                return false;
             }
         }
         return false;
@@ -801,6 +835,160 @@ mod tests {
     #[test]
     fn test_curl() {
         assert_eq!(evaluate(&make_input("curl https://example.com", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    // ===== gh (GitHub CLI) read-only → allow =====
+
+    #[test]
+    fn test_gh_pr_view() {
+        assert_eq!(evaluate(&make_input("gh pr view 123", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_pr_list() {
+        assert_eq!(evaluate(&make_input("gh pr list", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_pr_diff() {
+        assert_eq!(evaluate(&make_input("gh pr diff 123", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_pr_checks() {
+        assert_eq!(evaluate(&make_input("gh pr checks 123", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_pr_status() {
+        assert_eq!(evaluate(&make_input("gh pr status", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_issue_view() {
+        assert_eq!(evaluate(&make_input("gh issue view 456", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_issue_list() {
+        assert_eq!(evaluate(&make_input("gh issue list", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_run_view() {
+        assert_eq!(evaluate(&make_input("gh run view 789", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_run_list() {
+        assert_eq!(evaluate(&make_input("gh run list", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_repo_view() {
+        assert_eq!(evaluate(&make_input("gh repo view owner/repo", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_release_list() {
+        assert_eq!(evaluate(&make_input("gh release list", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_release_view() {
+        assert_eq!(evaluate(&make_input("gh release view v1.0", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_api() {
+        assert_eq!(evaluate(&make_input("gh api repos/owner/repo/pulls/123/comments", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_status() {
+        assert_eq!(evaluate(&make_input("gh status", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_search() {
+        assert_eq!(evaluate(&make_input("gh search issues something", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_workflow_list() {
+        assert_eq!(evaluate(&make_input("gh workflow list", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_workflow_view() {
+        assert_eq!(evaluate(&make_input("gh workflow view ci.yml", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_label_list() {
+        assert_eq!(evaluate(&make_input("gh label list", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    #[test]
+    fn test_gh_project_list() {
+        assert_eq!(evaluate(&make_input("gh project list", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
+    }
+
+    // ===== gh mutating → fall through =====
+
+    #[test]
+    fn test_gh_pr_create() {
+        assert_eq!(evaluate(&make_input("gh pr create --title test", cwd())), Decision::Abstain);
+    }
+
+    #[test]
+    fn test_gh_pr_merge() {
+        assert_eq!(evaluate(&make_input("gh pr merge 123", cwd())), Decision::Abstain);
+    }
+
+    #[test]
+    fn test_gh_pr_close() {
+        assert_eq!(evaluate(&make_input("gh pr close 123", cwd())), Decision::Abstain);
+    }
+
+    #[test]
+    fn test_gh_issue_create() {
+        assert_eq!(evaluate(&make_input("gh issue create", cwd())), Decision::Abstain);
+    }
+
+    #[test]
+    fn test_gh_repo_create() {
+        assert_eq!(evaluate(&make_input("gh repo create test-repo", cwd())), Decision::Abstain);
+    }
+
+    #[test]
+    fn test_gh_repo_delete() {
+        assert_eq!(evaluate(&make_input("gh repo delete owner/repo", cwd())), Decision::Abstain);
+    }
+
+    #[test]
+    fn test_gh_run_rerun() {
+        assert_eq!(evaluate(&make_input("gh run rerun 789", cwd())), Decision::Abstain);
+    }
+
+    #[test]
+    fn test_gh_bare() {
+        assert_eq!(evaluate(&make_input("gh", cwd())), Decision::Abstain);
+    }
+
+    #[test]
+    fn test_gh_pr_bare() {
+        assert_eq!(evaluate(&make_input("gh pr", cwd())), Decision::Abstain);
+    }
+
+    #[test]
+    fn test_gh_pr_edit() {
+        assert_eq!(evaluate(&make_input("gh pr edit 123", cwd())), Decision::Abstain);
+    }
+
+    #[test]
+    fn test_gh_pr_view_piped() {
+        assert_eq!(evaluate(&make_input("gh pr view 123 | head -20", cwd())), Decision::Allow("Safe read-only/build command".to_string()));
     }
 
     // ===== npx/uvx transparent wrapper → allow =====
